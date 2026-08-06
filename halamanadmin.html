@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Admin Pisshop</title>
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+background:#eef1f7;
+}
+
+.container{
+width:98%;
+margin:20px auto;
+}
+
+/* HEADER */
+
+.header{
+background:#7a563b;
+height:64px;
+border-radius:10px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 20px;
+color:white;
+}
+
+.logo{
+display:flex;
+align-items:center;
+gap:10px;
+font-size:18px;
+font-weight:bold;
+}
+
+.logo i{
+font-size:25px;
+}
+
+.header-right{
+display:flex;
+gap:10px;
+}
+
+.btn{
+border:none;
+padding:9px 18px;
+border-radius:4px;
+cursor:pointer;
+font-size:14px;
+}
+
+.logout{
+background:white;
+color:#6d472d;
+font-weight:bold;
+}
+
+.tutup{
+background:#6b4429;
+color:white;
+}
+
+/* CARD */
+
+.cards{
+margin-top:20px;
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:18px;
+}
+
+.card{
+background:white;
+border-radius:10px;
+padding:18px;
+box-shadow:0 2px 8px rgba(0,0,0,.08);
+border-left:4px solid #7a563b;
+height:78px;
+}
+
+.card h4{
+font-size:13px;
+color:#777;
+margin-bottom:8px;
+text-transform:uppercase;
+}
+
+.card h2{
+font-size:35px;
+color:#7a563b;
+}
+
+/* TABLE */
+
+.table-box{
+margin-top:25px;
+}
+
+.table-title{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:10px;
+font-size:24px;
+font-weight:bold;
+color:#222;
+}
+
+.table-title span{
+font-size:28px;
+}
+
+.delete{
+background:#dc3545;
+color:white;
+padding:9px 18px;
+border:none;
+border-radius:4px;
+cursor:pointer;
+font-size:14px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+background:white;
+border-radius:10px;
+overflow:hidden;
+box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+
+thead{
+background:white;
+}
+
+thead th{
+padding:16px;
+text-align:left;
+font-size:15px;
+color:#444;
+border-bottom:1px solid #ddd;
+}
+
+tbody td{
+padding:18px;
+text-align:center;
+color:#888;
+}
+
+tbody tr{
+border-bottom:1px solid #eee;
+}
+
+.empty{
+padding:18px;
+}
+
+@media(max-width:900px){
+
+.cards{
+grid-template-columns:1fr;
+}
+
+.header{
+flex-direction:column;
+height:auto;
+padding:15px;
+gap:15px;
+}
+
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<div class="header">
+
+<div class="logo">
+<i class="fa-solid fa-user-shield"></i>
+<h1>Dashboard Admin Pisshop</h1>
+</div>
+
+<div class="header-right">
+<button class="btn logout"
+onclick="location.href='login.html'">
+Logout</button>
+<button class="btn tutup">Tutup</button>
+</div>
+
+</div>
+
+<div class="cards">
+
+<div class="card">
+<h4>TOTAL PESANAN</h4>
+<h2 id="admTotalOrders">0</h2>
+</div>
+
+<div class="card">
+<h4>ITEM TERJUAL</h4>
+<h2 id="admTotalItems">0</h2>
+</div>
+
+<div class="card">
+<h4>TOTAL OMSET</h4>
+<h2 id="admTotalRevenue" style="font-size:20px;">Rp 0</h2>
+</div>
+</div>
+
+<div class="table-box">
+
+<div class="table-title">
+
+<div>
+<span><i class="fa-solid fa-list"></i></span>
+Data Checkout Masuk
+</div>
+
+<button class="delete" onclick="clearAllOrders()">
+Hapus Semua Data
+</button>
+
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+<th>ID</th>
+<th>Nama Pembeli</th>
+<th>Telepon</th>
+<th>Alamat</th>
+<th>Produk</th>
+<th>Qty</th>
+<th>Total</th>
+<th>Waktu</th>
+<th>Status</th>
+</tr>
+
+</thead>
+
+<tbody id="ordersTableBody">
+
+<tr>
+<td colspan="9" class="empty">
+Belum ada pesanan masuk.
+</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<script>
+
+function renderAdminDashboard(){
+
+    const orders = JSON.parse(localStorage.getItem("shopee_orders")) || [];
+
+    let totalRevenue = 0;
+    let totalItems = 0;
+
+    orders.forEach(order=>{
+        totalRevenue += order.total;
+        totalItems += order.itemsCount;
+    });
+
+    document.getElementById("admTotalOrders").innerText = orders.length;
+    document.getElementById("admTotalItems").innerText = totalItems;
+    document.getElementById("admTotalRevenue").innerText =
+    "Rp " + totalRevenue.toLocaleString("id-ID");
+
+    const tbody = document.getElementById("ordersTableBody");
+
+    if(orders.length===0){
+
+        tbody.innerHTML=`
+        <tr>
+        <td colspan="9" class="empty">
+        Belum ada pesanan masuk.
+        </td>
+        </tr>
+        `;
+
+        return;
+    }
+
+    tbody.innerHTML=orders.map(order=>`
+
+    <tr>
+
+    <td>${order.id}</td>
+
+    <td>${order.buyer}</td>
+
+    <td>${order.phone}</td>
+
+    <td>${order.address}</td>
+
+    <td>${order.productTitle}</td>
+
+    <td>${order.itemsCount}</td>
+
+    <td>Rp ${order.total.toLocaleString("id-ID")}</td>
+
+    <td>${order.time}</td>
+
+    <td>
+    <span style="
+    background:#d4edda;
+    color:#155724;
+    padding:4px 10px;
+    border-radius:5px;
+    font-size:12px;
+    font-weight:bold;">
+    Masuk
+    </span>
+    </td>
+
+    </tr>
+
+    `).join("");
+
+}
+
+function clearAllOrders(){
+
+    if(confirm("Hapus semua data checkout?")){
+
+        localStorage.removeItem("shopee_orders");
+
+        renderAdminDashboard();
+
+    }
+
+}
+
+window.onload = renderAdminDashboard;
+
+</script>
+
+</body>
+</html>
